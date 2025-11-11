@@ -3,6 +3,7 @@ package com.example.kuit.service;
 import com.example.kuit.dto.response.LoginResponse;
 import com.example.kuit.dto.response.ReissueResponse;
 import com.example.kuit.jwt.JwtUtil;
+import com.example.kuit.model.RefreshToken;
 import com.example.kuit.model.Role;
 import com.example.kuit.model.User;
 import com.example.kuit.repository.RefreshTokenRepository;
@@ -27,8 +28,20 @@ public class AuthService {
         }
 
         String accessToken = jwtUtil.generateAccessToken(username, user.role().name());
+        String refreshToken = jwtUtil.generateRefreshToken(username, user.role().name());
 
-        return LoginResponse.of(accessToken);
+        // TODO: 기존 RefreshToken 삭제
+        refreshTokenRepository.deleteByUsername(username);
+
+        // TODO: 새로운 RefreshToken DB에 저장
+        RefreshToken token = new RefreshToken(
+                username,
+                refreshToken,
+                jwtUtil.getExpiration(refreshToken)
+        );
+        refreshTokenRepository.save(token);
+
+        return LoginResponse.of(accessToken, refreshToken);
     }
 
     public ReissueResponse reissue(String username, Role role, String refreshToken) {
