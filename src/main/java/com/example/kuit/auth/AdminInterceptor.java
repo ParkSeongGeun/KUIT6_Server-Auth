@@ -1,5 +1,6 @@
 package com.example.kuit.auth;
 
+import com.example.kuit.model.Role;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,16 @@ public class AdminInterceptor implements HandlerInterceptor {
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        // TODO 1: request.getAttribute("role")로 역할(Role) 조회
+        Role role = (Role) request.getAttribute("role");
+
+        // TODO 2: ROLE_ADMIN 인지 확인
+        if (role != Role.ROLE_ADMIN) {
+            // TODO 3: 아니라면 403(FORBIDDEN) 반환
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            return false;
+        }
+
         return true;
     }
 }

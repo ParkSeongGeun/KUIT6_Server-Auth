@@ -1,11 +1,16 @@
 package com.example.kuit.auth;
 
 import com.example.kuit.jwt.JwtUtil;
+import com.example.kuit.model.Role;
+import com.example.kuit.model.TokenType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
+
+import java.net.http.HttpHeaders;
 
 @Component
 @RequiredArgsConstructor
@@ -26,6 +31,35 @@ public class AuthInterceptor implements HandlerInterceptor {
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        // TODO 1: Authorization 헤더에서 "Bearer <토큰>" 추출
+        String header = request.getHeader("Authorization");
+
+        if (!StringUtils.hasText(header) || !header.startsWith("Bearer ")) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return false;
+        }
+
+        String token = header.substring(7);
+
+        // TODO 2: JwtUtil.validate(...) 로 유효성 검사 (만료/위변조 등)
+        if (!jwtUtil.validate(token)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return false;
+        }
+
+        // TODO 3: 토큰 타입이 ACCESS 인지 확인 (REFRESH 요청은 제외 대상)
+        if (jwtUtil.getTokenType(token) != TokenType.ACCESS) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return false;
+        }
+
+        // TODO 4: username/role 을 request attribute 로 저장 (컨트롤러에서 사용)
+        String username = jwtUtil.getUsername(token);
+        Role role = jwtUtil.getRole(token);
+
+        request.setAttribute("username", username);
+        request.setAttribute("role", role);
+
         return true;
     }
 }

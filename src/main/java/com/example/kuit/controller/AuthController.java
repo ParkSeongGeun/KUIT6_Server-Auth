@@ -38,7 +38,6 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
-
         // TODO: 로그인 성공시 RefreshToken 까지 발급해보기
         LoginResponse response = authService.login(request.username(), request.password());
 
