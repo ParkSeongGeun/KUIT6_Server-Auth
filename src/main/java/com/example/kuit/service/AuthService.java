@@ -64,6 +64,20 @@ public class AuthService {
         // TODO: AccessToken 재발급
         String newAccession = jwtUtil.generateAccessToken(username, role.name());
 
-        return ReissueResponse.of(newAccession);
+        // TODO: RefreshToken도 재발급
+        String newRefreshToken = jwtUtil.generateRefreshToken(username, role.name());
+
+        // TODO: 기존 RefreshToken 삭제
+        refreshTokenRepository.deleteByUsername(username);
+
+        // TODO: 새 RefreshToken 저장
+        RefreshToken token = new RefreshToken(
+                username,
+                newRefreshToken,
+                jwtUtil.getExpiration(newRefreshToken)
+        );
+        refreshTokenRepository.save(token);
+
+        return ReissueResponse.of(newAccession, newRefreshToken);
     }
 }
