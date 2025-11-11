@@ -11,6 +11,8 @@ import com.example.kuit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -46,12 +48,22 @@ public class AuthService {
 
     public ReissueResponse reissue(String username, Role role, String refreshToken) {
         // TODO: DB에 RefreshToken 존재 여부 확인 - refreshTokenRepository.findByUsername 메서드 활용
+        RefreshToken storedToken = refreshTokenRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("저장된 RefreshToken이 없습니다."));
 
         // TODO: DB에 저장되어있는 토큰의 만료 여부 검사 - refresh
+        if (storedToken.isExpired()) {
+            throw new IllegalArgumentException("RefreshToken이 만료되었습니다.");
+        }
 
         // TODO: DB에 저장되어있는 토큰과 요청으로 받은 토큰의 동일 여부 검사
+        if (!storedToken.token().equals(refreshToken)) {
+            throw new IllegalArgumentException("RefreshToken이 일치하지 않습니다.");
+        }
 
         // TODO: AccessToken 재발급
-        return ReissueResponse.of("accessToken");
+        String newAccession = jwtUtil.generateAccessToken(username, role.name());
+
+        return ReissueResponse.of(newAccession);
     }
 }
