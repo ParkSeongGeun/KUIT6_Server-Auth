@@ -2,10 +2,14 @@ package com.example.kuit.config;
 
 import com.example.kuit.auth.AdminInterceptor;
 import com.example.kuit.auth.AuthInterceptor;
+import com.example.kuit.auth.AuthUserArgumentResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
@@ -13,6 +17,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     private final AuthInterceptor authInterceptor;
     private final AdminInterceptor adminInterceptor;
+    private final AuthUserArgumentResolver authUserArgumentResolver;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -22,5 +27,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
         registry.addInterceptor(adminInterceptor)
                 .addPathPatterns("/api/users/admin");
+    }
+
+    @Override
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+        resolvers.add(authUserArgumentResolver);
     }
 }

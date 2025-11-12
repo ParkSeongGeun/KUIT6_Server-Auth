@@ -1,9 +1,9 @@
 package com.example.kuit.controller;
 
+import com.example.kuit.auth.AuthUser;
 import com.example.kuit.dto.response.AdminResponse;
 import com.example.kuit.dto.response.ProfileResponse;
 import com.example.kuit.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,9 +24,7 @@ public class UserController {
         AuthInterceptor 에서 인증 완료 후 username 을 request attribute 로 저장
      */
     @GetMapping("/me")
-    public ResponseEntity<ProfileResponse> me(HttpServletRequest request) {
-        // AuthInterceptor 에서 이미 인증 완료, username 만 가져오면 됨
-        String username = (String) request.getAttribute("username");
+    public ResponseEntity<ProfileResponse> me(@AuthUser String username) {
         ProfileResponse profile = userService.getProfile(username);
         return ResponseEntity.ok(profile);
     }
